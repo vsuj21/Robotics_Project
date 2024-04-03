@@ -1,0 +1,106 @@
+4.28,Cylinder (1)
+4.280652,Cylinder (1)
+4.282609,Cylinder (1)
+4.285873,Cylinder (1)
+4.290451,Cylinder (1)
+4.296349,Cylinder (1)
+4.303575,Cylinder (1)
+4.312142,Cylinder (1)
+4.322062,Cylinder (1)
+4.33335,Cylinder (1)
+4.346026,Cylinder (1)
+4.360107,Cylinder (1)
+4.375618,Cylinder (1)
+8.484976,Sphere
+8.348313,Sphere
+8.24668,Sphere
+8.199104,Sphere
+8.191012,Sphere
+8.183526,Sphere
+8.262479,Sphere
+8.448307,Sphere
+5.2532,Steps
+5.250799,Steps
+5.249999,Steps
+5.250799,Steps
+5.2532,Steps
+5.257205,Steps
+5.262819,Steps
+5.270054,Steps
+5.278918,Steps
+5.289426,Steps
+5.301595,Steps
+4.986117,Ramp (1)
+4.491846,Ramp (1)
+4.087862,Ramp (1)
+3.856654,Ramp (1)
+3.871606,Ramp (1)
+3.887863,Ramp (1)
+3.905452,Ramp (1)
+3.924402,Ramp (1)
+3.944743,Ramp (1)
+3.966512,Ramp (1)
+3.989744,Ramp (1)
+4.01448,Ramp (1)
+4.040763,Ramp (1)
+4.06864,Ramp (1)
+4.098161,Ramp (1)
+4.129381,Ramp (1)
+4.162358,Ramp (1)
+4.197154,Ramp
+4.233838,Ramp
+4.272481,Ramp
+4.313163,Ramp
+4.355966,Ramp
+4.400981,Ramp
+4.448305,Ramp
+4.498043,Ramp
+4.550307,Ramp
+4.605222,Ramp
+4.662913,Ramp
+9.998475,WallStraight (7)
+9.963032,WallStraight (7)
+9.930854,WallStraight (7)
+9.901889,WallStraight (7)
+9.876091,WallStraight (7)
+9.853422,WallStraight (7)
+9.833846,WallStraight (7)
+9.817331,WallStraight (7)
+9.803853,WallStraight (7)
+9.793391,WallStraight (7)
+9.78593,WallStraight (7)
+9.781457,WallStraight (7)
+9.779965,WallStraight (7)
+9.781581,WallStraight (6)
+9.786051,WallStraight (6)
+9.793509,WallStraight (6)
+9.803968,WallStraight (6)
+9.817443,WallStraight (6)
+9.833955,WallStraight (6)
+9.853529,WallStraight (6)
+9.876194,WallStraight (6)
+9.901988,WallStraight (6)
+9.930951,WallStraight (6)
+9.963125,WallStraight (6)
+9.998566,WallStraight (6)
+9.742011,RampLarge
+9.685285,RampLarge
+9.63213,RampLarge
+9.582458,RampLarge
+9.536188,RampLarge
+9.493237,RampLarge
+9.453541,RampLarge
+9.417031,RampLarge
+9.383649,RampLarge
+9.353342,RampLarge
+9.326062,RampLarge
+9.301767,RampLarge
+9.280417,RampLarge
+9.261979,RampLarge
+9.246427,RampLarge
+9.233732,RampLarge
+9.22388,RampLarge
+9.216851,RampLarge
+9.892243,Cylinder
+9.946833,Cylinder
+4.280652,Cylinder (1)
