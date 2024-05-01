@@ -3,43 +3,47 @@ using System.IO;
 
 public class LiDAR : MonoBehaviour
 {
-    public float maxDistance = 10f; // Maximum detection range of LiDAR
-    public int numberOfRays = 360; // Number of rays to cast for 360-degree coverage
-    public float angleIncrement = 1f; // Increment angle between each ray
-    public string lidarDataFileName = "lidar_data.txt"; // File to save LiDAR data
+    public int imageWidth = 1920; // Width of the camera image
+    public int imageHeight = 1080; // Height of the camera image
+    public string lidarDataFileName = "lidar_data.txt"; // File to save LiDAR-like data
 
     private StreamWriter writer;
-    private bool hasScanned = false; // Flag to track if LiDAR has scanned
+    private Camera mainCamera;
 
     void Start()
     {
-        // Check if LiDAR has already scanned
-        if (!hasScanned)
-        {
-            // Open a file for writing LiDAR data
-            writer = new StreamWriter(lidarDataFileName);
-
-            // Perform LiDAR scan
-            PerformLiDARScan();
-
-            // Set flag to true to prevent further scans
-            hasScanned = true;
-        }
+        // Get reference to the main camera
+        mainCamera = Camera.main;
     }
 
-    void PerformLiDARScan()
+    public void PerformLiDARScan()
     {
-        // Iterate over the specified number of rays
-        for (float angle = 0; angle < 360; angle += angleIncrement)
-        {
-            // Calculate ray direction based on current angle
-            Vector3 rayDirection = Quaternion.Euler(0, angle, 0) * transform.forward;
+        // Open the file for writing LiDAR-like data
+        writer = new StreamWriter(lidarDataFileName);
 
-            RaycastHit hit;
-            if (Physics.Raycast(transform.position, rayDirection, out hit, maxDistance))
+        // Iterate over all pixels in the camera image
+        for (int y = 0; y < imageHeight; y++)
+        {
+            for (int x = 0; x < imageWidth; x++)
             {
-                // Process LiDAR data (e.g., save distance to file)
-                writer.WriteLine(hit.distance + "," + hit.collider.gameObject.name); // Also save obstacle's name
+                // Convert pixel coordinates to viewport coordinates (normalized screen coordinates)
+                Vector3 viewportPos = new Vector3((float)x / imageWidth, (float)y / imageHeight, 0);
+
+                // Cast a ray from the camera through the current pixel
+                Ray ray = mainCamera.ViewportPointToRay(viewportPos);
+
+                RaycastHit hit;
+                if (Physics.Raycast(ray, out hit))
+                {
+                    // Process LiDAR-like data (e.g., save hit point position to file)
+                    Vector3 hitPoint = hit.point;
+                    writer.WriteLine(hitPoint.x + "," + hitPoint.y + "," + hitPoint.z);
+                }
+                else
+                {
+                    // If no hit, represent as infinity
+                    writer.WriteLine("inf,inf,inf");
+                }
             }
         }
 

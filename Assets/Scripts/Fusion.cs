@@ -1,121 +1,101 @@
 using UnityEngine;
 using System.IO;
+using System.Collections.Generic;
 
 public class Fusion : MonoBehaviour
 {
+    public RenderTexture capturedRenderTexture;
     public string lidarDataFileName = "lidar_data.txt";
-    public string rgbDataFileName = "rgb_data.txt";
-    public float obstacleThreshold = 5f; // Distance threshold for detecting obstacles
+    public string fusionOutputFileName = "fusion_output.png";
 
-    private struct LiDARPoint
+    public int sampleRate = 10; // Adjust the sampling rate to control point density
+
+    public void StartFusion()
     {
-        public float distance;
-        public string obstacleName;
-    }
-
-    private struct RGBPixel
-    {
-        public float r;
-        public float g;
-        public float b;
-    }
-
-    private LiDARPoint[] lidarData;
-    private RGBPixel[] rgbData;
-
-    void Start()
-    {
-        // Read LiDAR data
-        ReadLiDARData();
-
-        // Read RGB data
-        ReadRGBData();
-
-        // Perform fusion
-        PerformFusion();
-    }
-
-    void ReadLiDARData()
-    {
-        // Read LiDAR data from file
-        string[] lines = File.ReadAllLines(lidarDataFileName);
-        lidarData = new LiDARPoint[lines.Length];
-
-        for (int i = 0; i < lines.Length; i++)
+        // Ensure the render texture is set
+        if (capturedRenderTexture == null)
         {
-            string[] parts = lines[i].Split(',');
-            lidarData[i].distance = float.Parse(parts[0]);
-            lidarData[i].obstacleName = parts[1];
+            Debug.LogError("Render texture is not assigned!");
+            return;
         }
-    }
 
-    void ReadRGBData()
-    {
-        // Read RGB data from file
-        string[] lines = File.ReadAllLines(rgbDataFileName);
-        rgbData = new RGBPixel[lines.Length];
+        // Load LiDAR data from file
+        string[] lidarLines = File.ReadAllLines(lidarDataFileName);
 
-        for (int i = 0; i < lines.Length; i++)
+        // Process LiDAR data and convert to a list of Vector3 points
+        List<Vector3> lidarPoints = new List<Vector3>();
+        foreach (string line in lidarLines)
         {
-            string[] parts = lines[i].Split(',');
-            rgbData[i].r = float.Parse(parts[0]);
-            rgbData[i].g = float.Parse(parts[1]);
-            rgbData[i].b = float.Parse(parts[2]);
+            if (line.StartsWith("inf"))
+                continue;
+
+            string[] parts = line.Split(',');
+            Vector3 lidarPoint = new Vector3(float.Parse(parts[0]), float.Parse(parts[1]), float.Parse(parts[2]));
+            lidarPoints.Add(lidarPoint);
         }
-    }
 
-    void PerformFusion()
-    {
-        // Define color ranges (example ranges)
-        float redThreshold = 0.9f;
-        float greenThreshold = 0.9f;
-        float blueThreshold = 0.9f;
+        // Create a new Texture2D with the dimensions of the render texture
+        Texture2D capturedImage = new Texture2D(capturedRenderTexture.width, capturedRenderTexture.height);
 
-        // Iterate through LiDAR data to detect obstacles and determine their colors
-        for (int i = 0; i < lidarData.Length; i++)
+        // Set the active render texture and read the pixels from it
+        RenderTexture.active = capturedRenderTexture;
+        capturedImage.ReadPixels(new Rect(0, 0, capturedRenderTexture.width, capturedRenderTexture.height), 0, 0);
+        capturedImage.Apply();
+
+        // Reset the active render texture
+        RenderTexture.active = null;
+
+        // Project LiDAR points onto image with sampling
+        foreach (Vector3 lidarPoint in lidarPoints)
         {
-            if (lidarData[i].distance < obstacleThreshold)
+            // Adjust LiDAR point for offset
+            Vector3 adjustedPoint = transform.TransformPoint(lidarPoint);
+
+            // Convert adjusted 3D LiDAR point to world coordinates
+            Vector3 worldPoint = Camera.main.WorldToScreenPoint(adjustedPoint);
+
+            // Overlay LiDAR points onto image
+            if (IsPointWithinImage(worldPoint))
             {
-                // Find corresponding RGB pixel based on LiDAR point's position
-                // (Assuming some mapping between LiDAR data and RGB data)
-                int rgbIndex = MapLiDARToRGB(i);
+                // Calculate distance from LiDAR sensor (assuming 3D Euclidean distance)
+                float distance = Vector3.Distance(adjustedPoint, Camera.main.transform.position);
 
-                // Determine obstacle color based on RGB data
-                string obstacleColor = ClassifyColor(rgbData[rgbIndex]);
+                // Assign color based on distance
+                Color pointColor = DistanceToColor(distance);
 
-                // Output obstacle distance and color
-                Debug.Log("Obstacle detected at distance " + lidarData[i].distance + " with color " + obstacleColor);
+                // Set pixel color
+                capturedImage.SetPixel((int)worldPoint.x, (int)worldPoint.y, pointColor);
             }
         }
+
+        // Apply changes to the image
+        capturedImage.Apply();
+
+        // Save the fused output image
+        byte[] bytes = capturedImage.EncodeToPNG();
+        File.WriteAllBytes(fusionOutputFileName, bytes);
     }
 
-    int MapLiDARToRGB(int lidarIndex)
+    bool IsPointWithinImage(Vector3 point)
     {
-        // Implement mapping logic to find corresponding RGB pixel based on LiDAR point's position
-        // You may need to interpolate or approximate based on LiDAR point's position
-        // For simplicity, let's assume a direct mapping for demonstration
-        return lidarIndex;
+        // Check if the point is within the bounds of the image
+        return point.x >= 0 && point.x < capturedRenderTexture.width && point.y >= 0 && point.y < capturedRenderTexture.height;
     }
 
-    string ClassifyColor(RGBPixel pixel)
+    Color DistanceToColor(float distance)
     {
-        // Define color ranges and classify based on RGB values
-        if (pixel.r >= 0.5f && pixel.g < 0.5f && pixel.b < 0.5f)
+        // Adjust the color assignment based on distance
+        if (distance < 5)
         {
-            return "Red";
+            return Color.red; // Close objects
         }
-        else if (pixel.r < 0.5f && pixel.g >= 0.5f && pixel.b < 0.5f)
+        else if (distance < 10)
         {
-            return "Green";
-        }
-        else if (pixel.r < 0.5f && pixel.g < 0.5f && pixel.b >= 0.5f)
-        {
-            return "Blue";
+            return Color.green; // Mid-range objects
         }
         else
         {
-            return "Unknown"; // Or you can further classify based on other colors
+            return Color.blue; // Far objects
         }
     }
-
 }
